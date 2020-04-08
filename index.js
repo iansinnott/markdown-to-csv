@@ -2,6 +2,7 @@ const fs = require("fs");
 const path = require("path");
 const fm = require("front-matter");
 const tap = require("ramda/src/tap");
+const { execSync } = require("child_process");
 
 const dataToCsv = d => {
   const filename = d.name + ".csv";
@@ -82,6 +83,14 @@ const main = () => {
   const filecount = data.flatMap(x => x.files).length;
 
   console.log(`Handled ${filecount} files`);
+
+  // Doing all this in the makefile now
+  // [`mkdir -p ${outdir}`, `mv *.md ${outdir}`, `mv *.csv ${outdir}`].forEach(
+  //   x => {
+  //     console.log("Running: $ ", x);
+  //     execSync(x);
+  //   }
+  // );
 };
 
 main();
