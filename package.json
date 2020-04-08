@@ -1,0 +1,6 @@
+{
+  "name": "markdown-to-csv",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT"
+}
