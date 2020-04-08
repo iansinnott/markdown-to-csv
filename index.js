@@ -1,8 +1,6 @@
 const fs = require("fs");
 const path = require("path");
 const fm = require("front-matter");
-const tap = require("ramda/src/tap");
-const { execSync } = require("child_process");
 
 const dataToCsv = d => {
   const filename = d.name + ".csv";
