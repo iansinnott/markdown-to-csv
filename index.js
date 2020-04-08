@@ -3,16 +3,51 @@ const path = require("path");
 const fm = require("front-matter");
 const tap = require("ramda/src/tap");
 
-const dataToCsv = d => {};
+const dataToCsv = d => {
+  const filename = d.name + ".csv";
+  const parsed = d.files.map(x => x.parsed);
 
-const dataToMarkdown = d => {
-  return d.files
-    .map(x => x.parsed)
-    .map(
-      tap(({ attributes, body }) => {
-        fs.writeFileSync(attributes.title + ".md", body, { encoding: "utf8" });
+  // Aggregate all cols from every row
+  const cols = Array.from(
+    parsed.reduce((agg, x) => {
+      Object.keys(x.attributes).forEach(k => {
+        agg.add(k);
+      });
+
+      return agg;
+    }, new Set())
+  );
+
+  const rows = [cols];
+
+  parsed.forEach(({ attributes }) => {
+    rows.push(
+      cols.map(k => {
+        const v = attributes[k];
+        return Array.isArray(v)
+          ? v.join(",")
+          : v === undefined
+          ? ""
+          : v.constructor === Date
+          ? v.toISOString()
+          : v;
       })
     );
+  });
+
+  const csvData = rows
+    .map(row => row.map(cell => (cell ? `"${cell}"` : "")).join(","))
+    .join("\n");
+
+  fs.writeFileSync(filename, csvData, { encoding: "utf8" });
+};
+
+const dataToMarkdown = d => {
+  d.files
+    .map(x => x.parsed)
+    .forEach(({ attributes, body }) => {
+      fs.writeFileSync(attributes.title + ".md", body, { encoding: "utf8" });
+    });
 };
 
 const main = () => {
@@ -42,8 +77,11 @@ const main = () => {
     });
 
   data.forEach(dataToMarkdown);
+  data.forEach(dataToCsv);
 
-  console.log(JSON.stringify(dirs[1]));
+  const filecount = data.flatMap(x => x.files).length;
+
+  console.log(`Handled ${filecount} files`);
 };
 
 main();
